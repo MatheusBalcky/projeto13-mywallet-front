@@ -7,8 +7,10 @@ function register (e, navigate, name, email, password, passwordRepeat, setTextAl
     const URL = 'http://localhost:5000/register';
     e.preventDefault();
 
-    if((password !== passwordRepeat) || (password.length < 6 || password.length < 6)){
+    if((password !== passwordRepeat) || (password.length < 6 || passwordRepeat.length < 6)){
         setTextAlert('As senhas precisam ser iguais e no mínimo 6 caracteres !!!'); console.log('não registrou'); return;
+    } else if (name.length < 4){
+        setTextAlert('Nome precisa ter no mínimo 4 caractéres');  console.log('não registrou'); return;
     }
     setTextAlert('');
     
@@ -18,17 +20,17 @@ function register (e, navigate, name, email, password, passwordRepeat, setTextAl
         password
     }
 
-    const promise = axios.post(URL, body); // ! verificar se já existe o email no back
+    const promise = axios.post(URL, body);
     promise
     .then( res =>{
-        console.log(res);
+        //console.log(res);
         alert('Conta criada com sucesso')
         navigate('/');
     })
 
     .catch( err => {
-        console.log(err)
-    })
+        setTextAlert(err.response.data)
+    });
 }
 
 
