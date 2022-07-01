@@ -1,22 +1,35 @@
 import styled from 'styled-components';
-//import tokenContext from '../context/tokenContext';
+import tokenContext from '../context/tokenContext';
 import userDataContext from '../context/userDataContext';
-//import { Link, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useContext, useEffect } from 'react';
 
 
 
 function HomePage (){
-    // ! COLOCAR UM IF AQUI, SE NÃO TIVER 'USERDATA' VOLTA PRO '/'
-    const { userData } = useContext(userDataContext);  const { name } = userData;
-    //const { token } = useContext(tokenContext);
+    const { userData, setUserData } = useContext(userDataContext);
+    const { setToken } = useContext(tokenContext);
+    const navigate = useNavigate();
+    console.log(userData.name)
 
+    useEffect( () =>{
+        if(!userData.name){
+            navigate('/')
+        }
+    }, [userData, navigate]);
 
+    
+    //
+    function clickSignOut(){
+        console.log('Deslogando');
+        setUserData({});
+        setToken('');
+    }
     return (
         <Background>
             <header>
-                <h1>Olá, Fulano{name}</h1>
-                <ion-icon name="exit-outline"></ion-icon>
+                <h1>Olá, {userData.name}</h1>
+                <ion-icon onClick={clickSignOut} name="exit-outline"></ion-icon>
             </header>
 
             <div className="whiteBox">
@@ -45,11 +58,11 @@ function HomePage (){
     )
 }
 
+
+
+
+
 export default HomePage;
-
-
-
-
 
 
 // & CSS COMPONENTS
@@ -60,11 +73,11 @@ const Background = styled.div`
     flex-direction: column;
     gap: 10px;
     border: 1px solid black;
+    height: 94vh;
 
 
     header{
         box-sizing: border-box;
-        border: 1px solid pink;
         display: flex;
         justify-content: space-between; align-items: center;
         width: 100%;
@@ -74,7 +87,6 @@ const Background = styled.div`
         color: white;
         font-size: 1.5em;
         font-family: 'Josefin Sans', sans-serif;
-        text-align: center;
         font-weight: bold;
         }
         
@@ -87,7 +99,7 @@ const Background = styled.div`
     .whiteBox{
         background-color: white;
         width: 100%;
-        height: 500px;
+        height: 100%;
         border-radius: 5px;
 
         .boxSpan{

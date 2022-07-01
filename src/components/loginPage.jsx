@@ -10,7 +10,7 @@ function login (e, navigate, email, password, setTextAlert, setToken, setUserDat
     const URL = 'http://localhost:5000/login';
     e.preventDefault();
 
-    if(  email.length === 0 && password.length === 0 ){  
+    if(  email.length === 0 || password.length === 0 ){  
          setTextAlert('Preencha os campos corretamente'); return;
     } else if (password.length < 6){
         setTextAlert('E-mail ou senha incorretos!'); return
@@ -44,19 +44,16 @@ function LoginPage (){
     const { setUserData } = useContext(userDataContext)
     const navigate = useNavigate();
 
-    // function login (e){
-    //     e.preventDefault();
-    //     console.log('enviou')
-    // }
 
     return (
         <Background>
             <h1>MyWallet</h1>
-            <form onSubmit={ e => 
-                login(e, navigate, email, password, setTextAlert, setToken, setUserData)
-                }>
+
+            <form onSubmit={ e => login(e, navigate, email, password, setTextAlert, setToken, setUserData)} >
+
                 <input type="email" value={email} onChange={ (e) => setEmail(e.target.value)} 
                 placeholder='E-mail'/>
+
                 <input type="password" value={password} onChange={ (e) => setPassword(e.target.value)}
                 placeholder='Senha'/>
 
@@ -64,9 +61,11 @@ function LoginPage (){
 
                 <button>Entrar</button>
             </form>
+
             <Link to='/register'>
                 <p>Primeira vez? Cadastra-se!</p>
             </Link>
+            
         </Background>
         
     )

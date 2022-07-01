@@ -46,11 +46,9 @@ function RegisterPage (){
     return (
         <Background>
 
-            <h1>MyWallet <br /> Registro</h1>
+            <h1>MyWallet <br/> Registro</h1>
 
-            <form onSubmit={(e) => {
-                register(e, navigate,name, email, password, passwordRepeat, setTextAlert)
-            }}>
+            <form onSubmit={(e) => { register(e, navigate,name, email, password, passwordRepeat, setTextAlert)}} >
 
                 <input type="name" value={name} onChange={ (e) => setName(e.target.value)} 
                 placeholder='Nome' required/>
