@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import tokenContext from '../context/tokenContext';
 import userDataContext from '../context/userDataContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useContext, useEffect } from 'react';
 
 
@@ -10,8 +10,6 @@ function HomePage (){
     const { userData, setUserData } = useContext(userDataContext);
     const { setToken } = useContext(tokenContext);
     const navigate = useNavigate();
-    console.log(userData.name)
-
     useEffect( () =>{
         if(!userData.name){
             navigate('/')
@@ -19,7 +17,10 @@ function HomePage (){
     }, [userData, navigate]);
 
     
-    //
+
+
+
+    
     function clickSignOut(){
         console.log('Deslogando');
         setUserData({});
@@ -41,10 +42,12 @@ function HomePage (){
             
             <div className="options">
 
-                <div className="enter">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                    <span>Nova<br />entrada</span>
-                </div>
+                <Link to='/newEnter'>
+                    <div className="enter">
+                        <ion-icon name="add-circle-outline"></ion-icon>
+                        <span>Nova<br />entrada</span>
+                    </div>
+                </Link>
 
                 <div className="out">
                     <ion-icon name="remove-circle-outline"></ion-icon>
