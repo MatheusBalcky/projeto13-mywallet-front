@@ -2,13 +2,15 @@ import styled from 'styled-components';
 import tokenContext from '../context/tokenContext';
 import userDataContext from '../context/userDataContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 
 
 
 function HomePage (){
     const { userData, setUserData } = useContext(userDataContext);
-    const { setToken } = useContext(tokenContext);
+    const { token, setToken } = useContext(tokenContext);
+    const [ insAndOuts, setInsAndOuts ] = useState([]);
     const navigate = useNavigate();
     useEffect( () =>{
         if(!userData.name){
@@ -17,8 +19,22 @@ function HomePage (){
     }, [userData, navigate]);
 
     
-
-
+    useEffect( () =>{
+        const URL = 'http://localhost:5000/home';
+        const promise = axios.get(URL, { headers: { Authorization: token } });
+        promise
+        .then ( (res)=>{
+            console.log(res)
+            setInsAndOuts(res.data)
+        })
+        .catch( err => {
+            console.log(err)
+            setInsAndOuts(
+            <div className="boxSpan">
+                <span>Não há registros de <br /> entrada ou saída</span>
+            </div>)
+        })
+    }, [token]);
 
     
     function clickSignOut(){
@@ -34,15 +50,12 @@ function HomePage (){
             </header>
 
             <div className="whiteBox">
-                <div className="boxSpan">
-                    <span>Não há registros de <br /> entrada ou saída</span>
-                </div>
-
+                {insAndOuts.map( item => <div>{item.value}</div>)}
             </div>
             
             <div className="options">
 
-                <Link to='/newEnter'>
+                <Link className="enter" to='/newEnter'>
                     <div className="enter">
                         <ion-icon name="add-circle-outline"></ion-icon>
                         <span>Nova<br />entrada</span>
