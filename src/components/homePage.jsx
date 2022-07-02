@@ -4,7 +4,9 @@ import userDataContext from '../context/userDataContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs';
+dayjs.extend(customParseFormat)
 
 
 function HomePage (){
@@ -12,6 +14,7 @@ function HomePage (){
     const { token, setToken } = useContext(tokenContext);
     const [ insAndOuts, setInsAndOuts ] = useState([]);
     const navigate = useNavigate();
+
     useEffect( () =>{
         if(!userData.name){
             navigate('/')
@@ -24,24 +27,48 @@ function HomePage (){
         const promise = axios.get(URL, { headers: { Authorization: token } });
         promise
         .then ( (res)=>{
-            console.log(res)
-            setInsAndOuts(res.data)
+            console.log(res);
+            dealValues(res.data);
         })
         .catch( err => {
             console.log(err)
-            setInsAndOuts(
-            <div className="boxSpan">
-                <span>Não há registros de <br /> entrada ou saída</span>
-            </div>)
+            setInsAndOuts(<div className="boxSpan"><span>Não há registros de <br /> entrada ou saída</span></div>);
         })
     }, [token]);
 
-    
+
+    function dealValues (values){
+        const result = values.map( (item, index)  => {
+            if(item.type === 'enter'){
+                return <li key={index}>
+                            <div>
+                                <div className="date">{dayjs(item.date).format('DD/MM', 'pt-br')}</div>
+                                <div className="description">{item.description}</div>
+                            </div>
+                            <div className="value enterMoney">{parseInt(item.value).toFixed(2)}</div>
+                        </li>
+            } else {
+                return <li key={index}>
+
+                            <div>
+                                <div className="date">{dayjs(item.date).format('DD/MM')}</div>
+                                <div className="description">{item.description}</div>
+                            </div>
+
+                            <div className="value outMoney">{parseInt(item.value).toFixed(2)}</div>
+                        </li>
+            }
+        })
+        setInsAndOuts(result);
+    }
+
     function clickSignOut(){
         console.log('Deslogando');
         setUserData({});
         setToken('');
     }
+
+    
     return (
         <Background>
             <header>
@@ -50,7 +77,14 @@ function HomePage (){
             </header>
 
             <div className="whiteBox">
-                {insAndOuts.map( item => <div>{item.value}</div>)}
+                <ol>
+                    {insAndOuts}
+                </ol>
+
+                <div className="balanceFooter">
+                    <div className="balance">SALDO</div>
+                    <div className="money"></div>
+                </div>
             </div>
             
             <div className="options">
@@ -62,10 +96,13 @@ function HomePage (){
                     </div>
                 </Link>
 
+
+                <Link className="out" to='/newOut'>
                 <div className="out">
                     <ion-icon name="remove-circle-outline"></ion-icon>
                     <span>Nova<br />saída</span>
                 </div>
+                </Link>
 
             </div>
 
@@ -90,7 +127,6 @@ const Background = styled.div`
     gap: 10px;
     border: 1px solid black;
     height: 94vh;
-
 
     header{
         box-sizing: border-box;
@@ -117,6 +153,7 @@ const Background = styled.div`
         width: 100%;
         height: 100%;
         border-radius: 5px;
+        position: relative;
 
         .boxSpan{
             display: flex; justify-content: center; align-items: center;
@@ -129,6 +166,38 @@ const Background = styled.div`
                 filter: opacity(50%);
             }
 
+        }
+
+        ol{
+            margin: 18px;
+            display: flex; flex-direction: column;
+            gap: 10px;
+
+            li{
+                font-size: 1.5em;
+                display: flex; justify-content: space-between;
+                div{
+                    display: flex; gap: 15px;
+                }
+                .enterMoney{
+                    color: green;
+                }
+                .outMoney{
+                    color: red;
+                }
+            }
+            .date{
+                filter: opacity(30%);
+            }
+        }
+
+        .balanceFooter {
+            position: absolute;
+            bottom: 15px; left: 20px;
+        }
+        .balance {
+            font-weight: bold;
+            font-size: 1.5em;
         }
     }
 
