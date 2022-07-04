@@ -5,14 +5,38 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import customParseFormat from 'dayjs';
-dayjs.extend(customParseFormat)
 
+const formatterMoney = new Intl.NumberFormat("pt-BR",{
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2
+});
+
+function ValueListItem ({index, date, description, type, value,}){
+
+
+
+    return (
+        <li key={index}>
+            <div>
+                <div className="date">{dayjs(date).format('DD/MM')}</div>
+                <div className="description">{description}</div>
+            </div>
+
+            <ValueNumber type={type}>
+                {formatterMoney.format(parseFloat(value).toFixed(2))}
+            </ValueNumber>
+        </li>
+    )
+}
 
 function HomePage (){
     const { userData, setUserData } = useContext(userDataContext);
     const { token, setToken } = useContext(tokenContext);
     const [ insAndOuts, setInsAndOuts ] = useState([]);
+    const [disableBalance, setDisableBalance] = useState(true);
+    const [totalValue, setTotalValue] = useState(0);
+
     const navigate = useNavigate();
 
     useEffect( () =>{
@@ -25,40 +49,33 @@ function HomePage (){
     useEffect( () =>{
         const URL = 'http://localhost:5000/home';
         const promise = axios.get(URL, { headers: { Authorization: token } });
+
         promise
         .then ( (res)=>{
-            console.log(res);
-            dealValues(res.data);
+            if(res.data.length === 0){
+                setInsAndOuts(<div className="boxSpan"> <span>Não há registros de <br /> entrada ou saída</span> </div>);
+                return
+            }
+            setDisableBalance(false)
+            dealValues(res.data.reverse());
+            plusValues(res.data)  
         })
+
         .catch( err => {
             console.log(err)
-            setInsAndOuts(<div className="boxSpan"><span>Não há registros de <br /> entrada ou saída</span></div>);
         })
     }, [token]);
 
 
     function dealValues (values){
-        const result = values.map( (item, index)  => {
-            if(item.type === 'enter'){
-                return <li key={index}>
-                            <div>
-                                <div className="date">{dayjs(item.date).format('DD/MM', 'pt-br')}</div>
-                                <div className="description">{item.description}</div>
-                            </div>
-                            <div className="value enterMoney">{parseInt(item.value).toFixed(2)}</div>
-                        </li>
-            } else {
-                return <li key={index}>
+        const result = values.map( (item, index) =>
+        <ValueListItem
+        key={index}
+        date={item.date}
+        description={item.description}
+        type={item.type}
+        value={item.value} />)
 
-                            <div>
-                                <div className="date">{dayjs(item.date).format('DD/MM')}</div>
-                                <div className="description">{item.description}</div>
-                            </div>
-
-                            <div className="value outMoney">{parseInt(item.value).toFixed(2)}</div>
-                        </li>
-            }
-        })
         setInsAndOuts(result);
     }
 
@@ -68,6 +85,20 @@ function HomePage (){
         setToken('');
     }
 
+    function plusValues (values){
+        let result = 0;
+        const valuesReverted = values.reverse();
+
+        for(let i = 0; i < valuesReverted.length; i++){
+            if(valuesReverted[i].type === 'enter'){
+                result+= parseFloat(valuesReverted[i].value);
+                continue
+            }
+            result-= parseFloat(valuesReverted[i].value);
+        }
+        
+        setTotalValue(result.toFixed(2))
+    }
     
     return (
         <Background>
@@ -76,18 +107,20 @@ function HomePage (){
                 <ion-icon onClick={clickSignOut} name="exit-outline"></ion-icon>
             </header>
 
-            <div className="whiteBox">
-                <ol>
+            <WhiteBox>
+                <ListValues>
                     {insAndOuts}
-                </ol>
+                </ListValues>
 
-                <div className="balanceFooter">
+                <BalanceFooter totalValue={totalValue} disable={disableBalance}>
                     <div className="balance">SALDO</div>
-                    <div className="money"></div>
-                </div>
-            </div>
+                    <div className="money">{formatterMoney.format(totalValue)}</div>
+                </BalanceFooter>
+
+            </WhiteBox>
+
             
-            <div className="options">
+            <OptionsFooter>
 
                 <Link className="enter" to='/newEnter'>
                     <div className="enter">
@@ -98,13 +131,13 @@ function HomePage (){
 
 
                 <Link className="out" to='/newOut'>
-                <div className="out">
-                    <ion-icon name="remove-circle-outline"></ion-icon>
-                    <span>Nova<br />saída</span>
-                </div>
+                    <div className="out">
+                        <ion-icon name="remove-circle-outline"></ion-icon>
+                        <span>Nova<br />saída</span>
+                    </div>
                 </Link>
 
-            </div>
+            </OptionsFooter>
 
         </Background>
         
@@ -125,7 +158,6 @@ const Background = styled.div`
     display: flex; align-items: center;
     flex-direction: column;
     gap: 10px;
-    border: 1px solid black;
     height: 94vh;
 
     header{
@@ -145,70 +177,19 @@ const Background = styled.div`
         ion-icon[name='exit-outline']{
             color: white;
             font-size: 1.8em;
+            cursor: pointer;
         }
     }
+`
 
-    .whiteBox{
-        background-color: white;
-        width: 100%;
-        height: 100%;
-        border-radius: 5px;
-        position: relative;
-
-        .boxSpan{
-            display: flex; justify-content: center; align-items: center;
-            width: 100%;
-            height: 100%;
-
-            span{
-                text-align: center;
-                font-size: 1.4em;
-                filter: opacity(50%);
-            }
-
-        }
-
-        ol{
-            margin: 18px;
-            display: flex; flex-direction: column;
-            gap: 10px;
-
-            li{
-                font-size: 1.5em;
-                display: flex; justify-content: space-between;
-                div{
-                    display: flex; gap: 15px;
-                }
-                .enterMoney{
-                    color: green;
-                }
-                .outMoney{
-                    color: red;
-                }
-            }
-            .date{
-                filter: opacity(30%);
-            }
-        }
-
-        .balanceFooter {
-            position: absolute;
-            bottom: 15px; left: 20px;
-        }
-        .balance {
-            font-weight: bold;
-            font-size: 1.5em;
-        }
-    }
-
-    .options{
-        box-sizing: border-box;
-        padding: 0px 10px;
-        display: flex; justify-content: space-between;
-        width: 100%;
-        gap: 20px;
-    }
-
+const OptionsFooter = styled.div`
+ 
+    box-sizing: border-box;
+    padding: 0px 10px;
+    display: flex; justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+    
     .enter, .out{
         box-sizing: border-box;
         padding: 10px;
@@ -227,5 +208,69 @@ const Background = styled.div`
             font-weight: bold;
         }
     }
+`
 
+const BalanceFooter = styled.div`
+    box-sizing: border-box;
+    padding: 17px;
+    display: ${props => props.disable ? "none": "flex"};
+    justify-content: space-between; align-items: center;
+    width: 100%;
+
+    .balance {
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .money {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: ${props => props.totalValue < 0 ? "red": "green"};
+    }
+`
+
+const ValueNumber = styled.div`
+    color: ${ props => props.type === 'enter'? 'green':'red'};
+`
+
+const WhiteBox = styled.div`
+    display: flex; flex-direction: column; justify-content: space-between;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+
+    .boxSpan{
+        display: flex; justify-content: center; align-items: center;
+        width: 100%;
+        height: 100%;
+        
+        span{
+            text-align: center;
+            font-size: 1.4em;
+            filter: opacity(50%);
+        }
+    }
+`
+
+const ListValues = styled.ol`
+    
+    box-sizing: border-box;
+    margin: 18px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+    
+    li{
+        font-size: 1.2em;
+        display: flex; justify-content: space-between;
+
+        div{
+            display: flex; gap: 15px;
+        }
+    }
+
+    .date{
+        filter: opacity(30%);
+    }
+    
 `

@@ -1,19 +1,35 @@
 import styled from "styled-components"
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { useNavigate } from "react-router-dom";
+import NumberFormat from 'react-number-format';
+import tokenContext from '../context/tokenContext';
+import axios from "axios";
 
 function NewEnterPage (){
+    const navigate = useNavigate();
     const [value, setValue] = useState('');
     const [description, setDescription] = useState('');
-    
+    const { token } = useContext(tokenContext);
 
-
-    const bodyEnter = {
+    const body = {
         value,
         description
     }
+
     function sendEnter(e){
         e.preventDefault();
-        console.log(bodyEnter)
+        const URL = 'http://localhost:5000/newEnter';
+        const promise = axios.put(URL, body, {headers: { Authorization: `${token}`}});
+        
+        promise.then( res => {
+            alert('Valor salvo com sucesso')
+            navigate('/home');
+        })
+        .catch( err => {
+            alert('Valor não foi salvo com exito')
+            console.log(err)
+        })
+
     }
 
     return (
@@ -24,11 +40,21 @@ function NewEnterPage (){
             
             <form onSubmit={(e) => sendEnter(e)} >
 
-                <input type="number" placeholder="Valor" value={value}
-                onChange={ e => setValue(e.target.value)} />
+                <NumberFormat
+                    isNumericString={true}
+                    value={value}
+                    displayType={'input'}
+                    thousandSeparator={true}
+                    decimalScale={2}
+                    prefix={'R$'}
+                    onValueChange={(values) => {
+                        const { value } = values;
+                        setValue(value)
+                    }}
+                />
 
                 <input type="text" placeholder="Descrição" value={description}
-                onChange={ e => setDescription(e.target.value)}/>
+                onChange={ e => setDescription(e.target.value)} required/>
 
                 <button>Salvar Entrada</button>
             </form>
@@ -36,8 +62,8 @@ function NewEnterPage (){
     )
 }
 
-
 export default NewEnterPage;
+
 // & CSS COMPONENTS
 
 const Background = styled.div`
@@ -45,7 +71,6 @@ const Background = styled.div`
     display: flex; align-items: center;
     flex-direction: column;
     gap: 10px;
-    border: 1px solid black;
     height: 94vh;
 
     form {

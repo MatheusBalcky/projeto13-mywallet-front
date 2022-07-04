@@ -3,7 +3,7 @@ import RegisterPage from './components/registerPage';
 import LoginPage from './components/loginPage';
 import HomePage from './components/homePage';
 import NewEnterPage from './components/newEnterPage';
-import NewOutPage from './components/newOut';
+import NewOutPage from './components/newOutPage';
 import tokenContext from './context/tokenContext';
 import userDataContext from './context/userDataContext';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';

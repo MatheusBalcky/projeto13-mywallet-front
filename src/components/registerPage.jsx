@@ -33,8 +33,6 @@ function register (e, navigate, name, email, password, passwordRepeat, setTextAl
     });
 }
 
-
-
 function RegisterPage (){
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
