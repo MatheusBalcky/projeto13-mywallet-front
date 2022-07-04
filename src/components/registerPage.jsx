@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 function register (e, navigate, name, email, password, passwordRepeat, setTextAlert){
-    const URL = 'http://localhost:5000/register';
+    const URL = 'https://my-waallet.herokuapp.com/register';
     e.preventDefault();
 
     if((password !== passwordRepeat) || (password.length < 6 || passwordRepeat.length < 6)){

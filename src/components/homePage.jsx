@@ -47,7 +47,7 @@ function HomePage (){
 
     
     useEffect( () =>{
-        const URL = 'http://localhost:5000/home';
+        const URL = 'https://my-waallet.herokuapp.com/home';
         const promise = axios.get(URL, { headers: { Authorization: token } });
 
         promise

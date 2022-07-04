@@ -19,7 +19,7 @@ function NewOutPage (){
 
     function sendOut(e){
         e.preventDefault();
-        const URL = 'http://localhost:5000/newOut';
+        const URL = 'https://my-waallet.herokuapp.com/newOut';
         const promise = axios.put(URL, body, {headers: { Authorization: `${token}`}});
         
         promise.then( res => {

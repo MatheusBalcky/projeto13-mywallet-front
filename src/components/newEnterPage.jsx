@@ -18,7 +18,7 @@ function NewEnterPage (){
 
     function sendEnter(e){
         e.preventDefault();
-        const URL = 'http://localhost:5000/newEnter';
+        const URL = 'https://my-waallet.herokuapp.com/newEnter';
         const promise = axios.put(URL, body, {headers: { Authorization: `${token}`}});
         
         promise.then( res => {
